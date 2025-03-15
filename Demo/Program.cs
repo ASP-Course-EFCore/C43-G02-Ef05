@@ -22,7 +22,7 @@ namespace Demo
             ///  2.Table-Per-Hierarchy (TPH)     [Make one table for the 3 Tables of inheritance relationship].
             ///  3.Table-Per-Type (TPT)          [Make Table For every class/Type not for concrete type only].
 
-            #region Part 02 Inheritance Mapping [TPCT] - Table Pair Concrete Type.
+            #region Part 02 Inheritance Mapping [TPCT] - Table Per Concrete Type.
             ///Each Concrete Class Has it's own table, No table for base classes - only tables for concrete types.
             ///First Make The Models -> [Employee - FullTimeEmployee - PartTimeEmployee]
             ///And Make [FullTimeEmployee - PartTimeEmployee] inherit the common properties from the base class "Employee"
@@ -82,6 +82,163 @@ namespace Demo
             ///So To retrieve data from each table -> You need to make separate query for each table 
             ///Those 2 tables not have any relationship in database.
 
+            #endregion
+
+            #region Part 03 Inheritance Mapping [TPH] - Table-Per-Hierarchy
+            //Map This inheritance Hierarchy -> BaseClass "Employee" + ChildClass "FullTimeEmployee" + ChildClass "PartTimeEmployee" As one table.
+            //(TPH) is the default strategy in EF Core, All Classes in an inheritance hierarchy are mapped to a single table and a "discriminator" column is used to distinguished between different types "FullTimeEmployee" - "PartTimeEmployee".
+            //
+            //Steps => 
+            //1. Make Property of type DbSet of base class to represent the table Employees -> public DbSet<Employee> Employees { get; set; }
+            //2. Make Property of type DbSet of Child class to represent the table FullTimeEmployees -> public DbSet<FullTimeEmployee> FullTimeEmployees { get; set; }
+            //3. Make Property of type DbSet of Child class to represent the table PartTimeEmployees -> public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; }
+            //
+            //And By convention [Default] -> The EF Core Will map this inheritance hierarchy between those DbSets/Tables as only one table called "Employees" [Table Per Hierarchy]
+            //After Add-Migration -> Found that EF Core make one Table "Employees" has columns of "Employee" Class && "FullTimeEmployee" class && "PartTimeEmployee" class + Discriminator column 
+            //"Id" - "Name" - "Age" - "Address" - "Discriminator" - "Salary" - "StartDate" - "HourRate" - "CountOfHours"
+            //This Discriminator column -> which of type string and hold values "FullTimeEmployee" - "PartTimeEmployee" is To distinguished between different types "FullTimeEmployee" - "PartTimeEmployee".
+            //If you add inside the table "Employees" object of type "FullTimeEmployee" -> This Discriminator column will hold value "FullTimeEmployee"
+            //If you add inside the table "Employees" object of type "PartTimeEmployee" -> This Discriminator column will hold value "PartTimeEmployee"
+            //
+            //This is by convention.
+            //
+            //What if you need to define one property "DbSet<Employee> employees" inside the DbContext class and not add the another tables for "FullTimeEmployee" + "PartTimeEmployee"
+            //And at the same time you need to tell the EF Core that those table "Employee" + "FullTimeEmployee" + "PartTimeEmployee" are in the same Inheritance hierarchy
+            //Mean that you need to tell it to map then in one table that has columns of all 3 tables + Discriminator column
+            //  You can do this using Fluent APIs way ->
+            //Make configuration for class "FullTimeEmployee" - "PartTimeEmployee" to say that those entities are has base class "Employee" inside function OnModelCreating() inside class "MyCompanyDbContext"
+            //  protected override void OnModelCreating(ModelBuilder modelBuilder)
+            //  {
+            //      modelBuilder.Entity<FullTimeEmployee>()
+            //                  .HasBaseType<Employee>();
+            //  
+            //      modelBuilder.Entity<PartTimeEmployee>()
+            //                  .HasBaseType<Employee>();
+            //  }
+            //
+            //So now you tell EF Core That "FullTimeEmployee" & "PartTimeEmployee" are child classes for base class "Employee" to map them inside one table.
+            //
+            //What if you need to hold the "Discriminator" column and make configuration on it 
+            //Like if you need to change it's name or change it's default values "FullTimeEmployee" - "PartTimeEmployee".
+            //Make This using Fluent APIs inside OnModelCreating() -> 
+            //  protected override void OnModelCreating(ModelBuilder modelBuilder)
+            //  {
+            //      modelBuilder.Entity<Employee>()
+            //                  .HasDiscriminator<string>("EmployeeType")
+            //                  .HasValue<FullTimeEmployee>("FTE")
+            //                  .HasValue<PartTimeEmployee>("PTE");
+            //  }
+            //
+            //So now I change The "Discriminator" column name to "EmployeeType"
+            //And Change the default string values that it can hold from "FullTimeEmployee" - "PartTimeEmployee" to "FTE" - "PTE"
+            //
+            //Then Add-Migration "TPHMigration"
+            //And Update-Database
+            //
+            //Found that this Hierarchy relationship mapped as one table "Employees" which has all columns of the 3 tables + "EmployeeType" Column which is the Discriminator column hold values "FTE" || "PTE" to distigushed between FullTimeEmployee object/Row/Record and PartTimeEmployee object/Row/Record in Database.
+            //
+            //Note =>
+            //1.When Add object of type "FullTimeEmployee" in Database
+            //The value of columns of "PartTimeEmployee" class "HourRate" - "CountOfHours" will be set as "NULL"
+            //2.When Add object of type "PartTimeEmployee" in Database
+            //The value of columns of "PartTimeEmployee" class "Salary" - "StartDate" will be set as "NULL"
+
+            //using MyCompanyDbContext dbContext = new MyCompanyDbContext();
+
+            //FullTimeEmployee fullTimeEmployee = new FullTimeEmployee()
+            //{
+            //    Name = "Soha",
+            //    Age = 25,
+            //    Address = "Cairo",
+            //    Salary = 20000,
+            //    StartDate = DateTime.Now
+            //};
+
+            //PartTimeEmployee partTimeEmployee = new PartTimeEmployee()
+            //{
+            //    Name = "Amr",
+            //    Age = 30,
+            //    Address = "Giza",
+            //    HourRate = 100,
+            //    CountOfHours = 30
+            //};
+
+            //dbContext.Add<Employee>(fullTimeEmployee);//Add in the Employees Table
+            ////dbContext.Employees.Add(fullTimeEmployee);//Add in the Employees Table
+            ////dbContext.Set<FullTimeEmployee>().Add(fullTimeEmployee);//Add in the Employees Table
+            //dbContext.Add<Employee>(partTimeEmployee);
+
+            //dbContext.SaveChanges();
+
+            #region Example01 - Return All Employees [FTE + PTE]
+
+            //var Employees = dbContext.Employees;
+
+            //foreach (var employee in Employees)
+            //{
+            //    Console.WriteLine($"{employee.Name} :: {employee.Age}");//Soha:: 25
+            //                                                            //Amr:: 30 
+
+            //} 
+
+            #endregion
+
+            ///You can't say {employee.Salary} || {employee.StartDate} || {employee.HourRate} || {employee.CountOfHours}
+            ///Because the variable "employee" is of type class "Employee" mean it's object of type "Employee"
+            ///Mean it can only access properties/columns of class/table employee -> "Id" - "Name" - "Age" - "Address".
+
+
+            #region Example02 - Return Only FullTimeEmployees Records || PartTimeEmployees Records by first return all employees and then make filteration when make foreach to print [Make only one query].
+
+            //var employees = dbContext.Employees.AsNoTracking().ToList();
+
+            //foreach (var FTE in employees.OfType < FullTimeEmployee>())
+            //{
+            //    Console.WriteLine($"{FTE.Name} :: {FTE.Salary:c} :: {FTE.StartDate}");
+            //}
+
+            //foreach (var PTE in employees.OfType < PartTimeEmployee>())
+            //{
+            //    Console.WriteLine($"{PTE.Name} :: {PTE.HourRate} :: {PTE.CountOfHours}");
+            //}
+
+            ////Note => If you don't use ToList() "ImmediateExecution"
+            ////This query of retrieving all employees will not executed in the line of define it (193)
+            ////it will divided into 2 queries/SqlQueries to DB
+            ////one for get the FullTimeEmployees Objects
+            ////Another for get the PartTimeEmployees Objects
+            ////
+            ////So Use any immediate execution operator like ToList() 
+            ////To Execute this query in the line of defining instead of make 2 queries to DB
+            ////When using this Immediate execution operator -> you return all employees objects "FTE" + "PTE"
+            ////And then in for each you make filteration to view only "FTE" or "PTE" without make new query to DB.
+
+            #endregion
+
+            #region Example03 - Return Only FullTimeEmployees Records || PartTimeEmployees Records by make sql query for each type 
+
+            //var FTES = dbContext.Employees.AsNoTracking().OfType<FullTimeEmployee>();
+            //foreach (var FTE in FTES)
+            //{
+            //    Console.WriteLine($"{FTE.Name} :: {FTE.Salary:c} :: {FTE.StartDate}");//Soha :: $20,000.00 :: 3/15/2025 1:12:47 AM
+            //}
+
+
+            //var PTES = dbContext.Employees.AsNoTracking().OfType<PartTimeEmployee>();
+            //foreach (var PTE in PTES)
+            //{
+            //    Console.WriteLine($"{PTE.Name} :: {PTE.HourRate} :: {PTE.CountOfHours}");//Amr :: 100.00 :: 30
+            //}
+
+            #endregion
+
+            ///So this strategy (TPH) - Deal with all inheritance hierarchy as one table 
+            ///So when retrieve data from this table i will retrieve from one table but there are "Nulls".
+            ///Use This Strategy (TPH) - If You Don't care about "Nulls" in the Database.
+            ///Use This Strategy (TPH) - If You Need to deal with all employees [All Hierarchy] In one table.
+            ///This Strategy is the default behavior of mapping Inheritance relationship in EF Core
+            ///But in not use usually because it causes "Nulls".
+            
             #endregion
         }
     }

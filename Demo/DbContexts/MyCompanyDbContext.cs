@@ -10,12 +10,35 @@ namespace Demo.DbContexts
 {
     class MyCompanyDbContext:DbContext
     {
-        public DbSet<FullTimeEmployee> FullTimeEmployees { get; set; }
-        public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; }
+        #region [TPCT] Strategy - Make Table for every concrete class.
+        //public DbSet<FullTimeEmployee> FullTimeEmployees { get; set; }
+        //public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; } 
+        #endregion
+
+        #region [TPH] Strategy - Map the 3 tables as one table for all inheritance hierarchy.
+        public DbSet<Employee> Employees { get; set; }
+        //public DbSet<FullTimeEmployee> FullTimeEmployees { get; set; }
+        //public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; } //Or Define Them As Children For base class "Employee" inside OnModelCreating().
+        #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Server = . ; Database = MyCompany ; Trusted_Connection = true ; TrustServerCertificate = true");
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //modelBuilder.Entity<FullTimeEmployee>()
+            //            .HasBaseType<Employee>();
+
+            //modelBuilder.Entity<PartTimeEmployee>()
+            //            .HasBaseType<Employee>();
+
+            modelBuilder.Entity<Employee>()
+                        .HasDiscriminator<string>("EmployeeType")
+                        .HasValue<FullTimeEmployee>("FTE")
+                        .HasValue<PartTimeEmployee>("PTE");
+        }
+
     }
 }
