@@ -357,18 +357,18 @@ namespace Demo
 
             #region Example03 - Retrieve Data Of FullTimeEmployee Table .
 
-            var Employees = from E in dbContext.Employees
-                            select E;//Deferred Execution -> This query will not executed until use "Employees" variable
-                                     // So This is one query will executed to get data of PartTimeEmployee not 2 queries like previous to retrieve data of Employees Table then filter.
+            //var Employees = from E in dbContext.Employees
+            //                select E;//Deferred Execution -> This query will not executed until use "Employees" variable
+            //                         // So This is one query will executed to get data of PartTimeEmployee not 2 queries like previous to retrieve data of Employees Table then filter.
 
-            if (Employees is not null)
-            {
-                foreach (var item in Employees.OfType<PartTimeEmployee>())
-                {
-                    Console.WriteLine($"{item.Name}::{item.Age}::{item.Address}::{item.HourRate}::{item.CountOfHours}");
-                    //Heba::20::Mansoura::50.00::10                                                             
-                }
-            }
+            //if (Employees is not null)
+            //{
+            //    foreach (var item in Employees.OfType<PartTimeEmployee>())
+            //    {
+            //        Console.WriteLine($"{item.Name}::{item.Age}::{item.Address}::{item.HourRate}::{item.CountOfHours}");
+            //        //Heba::20::Mansoura::50.00::10                                                             
+            //    }
+            //}
 
             #endregion
 
@@ -383,9 +383,59 @@ namespace Demo
             ///
             ///Use [TPT] -> If You need to deal with each type as separate table
             ///And Common Columns are in the base class.
-        
-            
-        
+
+            #region Part 05 Local & Load
+            //using MyCompanyDbContext dbContext = new MyCompanyDbContext();
+
+            #region Ex01 - Return Employees with Age != Null using Local and without use it.
+
+            //var result01 = dbContext.Employees.Any(E => E.Age != null);
+            ////This Line Will Send Request To DB To Check If there is any Employee object
+            ////In Employees Table that it's age column not "Null" and return true or false.
+            ////In This Line You Communicate With "Employees" table in Database not in Local[App].
+            //Console.WriteLine($"Remote = {result01}");//True
+            ////"True" Because There are 2 Employees objects in Employees Table That have Age != Null.
+
+            //var result02 = dbContext.Employees.Local.Any(E => E.Age != null);
+            ////No Database Interaction [There is no request sent to DB].
+            ////It will search locally in the data that loaded in the DbSet<Employee> Employees.
+            //Console.WriteLine($"Remote = {result02}");//False
+            ////"False" Because I not loaded any Employees objects inside this DbSet<Employee>.
+
+            #endregion
+
+            #region Ex02 - Return First Employee and check if there is employee with age == 22 Local & Remote.
+
+            //var employee01 = dbContext.Employees.FirstOrDefault();//This Employee object stored locally inside "DbSet<Employee> Employees"
+            //if(employee01 is not null)
+            //{
+            //    Console.WriteLine(employee01.Age);//22
+            //    employee01.Age = 25;//Edit Locally - Not Affect the DB because i don't make SaveChanges().
+            //}
+
+            //var LocalResult = dbContext.Employees.Local.Any(E => E.Age == 22);//Search Locally in "DbSet<Employee>"
+            //Console.WriteLine(LocalResult);//False. [Because There is no Employee object Returned Locally with Age = 22 - I edit Age of returned object locally to "25"]
+
+            //var remoteResult = dbContext.Employees.Any(E => E.Age == 22);//Search Remote in Database in table "Employees".
+            //Console.WriteLine(remoteResult);//True. [Because There is Employee object In Database with Age = 22]
+
+            #endregion
+
+            #region Ex03 - Use Load() To Load data of specific table locally.
+
+            //dbContext.Employees.Load();//All Employees objects/records in table Employees loaded locally by send request to DB.
+
+            //var oldEmployee = dbContext.Employees.FirstOrDefault(E => E.Age > 25);
+
+            //if(oldEmployee is not null)
+            //    Console.WriteLine(oldEmployee.Name);//Heba
+
+            #endregion
+
+            //So I use Local Keyword to search on the loaded data locally instead of send requests to Database.
+
+            #endregion
+
         }
     }
 }
