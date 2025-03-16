@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{96467573-F4E2-4E43-835A-EBAF79914566}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assignment", "Assignment\Assignment.csproj", "{1D5D9A63-F133-4978-A924-74E2191E1FE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseFirst", "DatabaseFirst\DatabaseFirst.csproj", "{1EABC074-E1F5-46B7-B65D-4711BC71A0B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBFirstEFCorePowerTool", "DBFirstEFCorePowerTool\DBFirstEFCorePowerTool.csproj", "{154A3E86-BA18-4101-B8A5-6F83031D877E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{1D5D9A63-F133-4978-A924-74E2191E1FE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D5D9A63-F133-4978-A924-74E2191E1FE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D5D9A63-F133-4978-A924-74E2191E1FE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EABC074-E1F5-46B7-B65D-4711BC71A0B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EABC074-E1F5-46B7-B65D-4711BC71A0B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EABC074-E1F5-46B7-B65D-4711BC71A0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EABC074-E1F5-46B7-B65D-4711BC71A0B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{154A3E86-BA18-4101-B8A5-6F83031D877E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{154A3E86-BA18-4101-B8A5-6F83031D877E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{154A3E86-BA18-4101-B8A5-6F83031D877E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{154A3E86-BA18-4101-B8A5-6F83031D877E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
