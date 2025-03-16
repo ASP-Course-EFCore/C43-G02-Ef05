@@ -88,6 +88,11 @@ namespace DBFirstEFCorePowerTool
 
             #endregion
 
+            //This make code tightly coupled to specific Database provider like SqlServer
+            //Because you write syntax of SqlServer
+            //So you can't use this APP/Project with another Database provider
+            //So We don't use this way - We query DB objects using the LinQ operators.
+            
             #endregion
 
         }
