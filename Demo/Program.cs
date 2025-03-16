@@ -1,6 +1,7 @@
 ﻿using Demo.DbContexts;
 using Demo.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace Demo
 {
@@ -238,8 +239,153 @@ namespace Demo
             ///Use This Strategy (TPH) - If You Need to deal with all employees [All Hierarchy] In one table.
             ///This Strategy is the default behavior of mapping Inheritance relationship in EF Core
             ///But in not use usually because it causes "Nulls".
-            
+
             #endregion
+
+            #region Part 04 Inheritance Mapping [TPT] - Table-Per-Type
+            //Each class in the inheritance hierarchy maps to a separate table 
+            //Mean That Map "Employee" Class As Table And "FullTimeEmployee" As Table And "PartTimeEmployee" As Table
+            //EF Core joins those tables when querying derived types.
+
+            //So Inside The "MyCompanyDbContext" class, make property of type DbSet<T>
+            //For each type 
+            //   public DbSet<Employee> Employees { get; set; }
+            //   public DbSet<FullTimeEmployee> FullTimeEmployees { get; set; }
+            //   public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; }
+            //But if you make this and try to add migration 
+            //The default behavior of EF Core to map this as [TPH] Strategy not [TPT].
+            //Mean Map them in one table and add Discriminator column.
+            //So we need to override this default behavior of mapping to one table when see property of type DbSet<parentClass> and another properties of type DbSet<ChildClass>
+            //EF Core when see this -> Map them in one table
+            //So We need to override this default behavior by write configuration "FluentAPIs" inside the OnModelCreating()
+            //To say that the child classes also will mapped as separated table.
+            //
+            //    modelBuilder.Entity<FullTimeEmployee>()
+            //              .ToTable("FullTimeEmployees");
+            //    modelBuilder.Entity<PartTimeEmployee>()
+            //                .ToTable("PartTimeEmployees");
+
+            //After Make This And Add-Migration
+            //EF Core Will Take "PK" column of table [Employees] "Parent Class/table"
+            //As "FK" column in the child classes [FullTimeEmployees] - [PartTimeEmployees].
+            //So now we have "FullTimeEmployees" table with columns "Id" - "Salary" - "StartDate"
+            //This "Id" refer to existing "Id" in "employees" table and also "PK" off table "FullTimeEmployees"
+            //And we have "PartTimeEmployees" table with columns "Id" - "HourRate" - "CountOfHours"
+            //This "Id" refer to existing "Id" in "employees" table and also "PK" of table "PartTimeEmployees"
+
+            //So with this approach we avoiding the "Null" by make table for the child types 
+            //And attach them with the parent type by take PK "Id" of parent type as FK in the child types.
+            //So every "FullTimeEmployee" record/row/object in the "FullTimeEmployees" table represent existing Employee in the "Employees" Table
+            //So every "PartTimeEmployee" record/row/object in the "PartTimeEmployees" table represent existing Employee in the "Employees" Table
+
+            //So when add new "FullTimeEmployee" object in DB with these columns values -> 
+            //Name = "Eslam" - Age = 22 - Address = "Mansoura" - Salary = 4000 - StartDate = DateTime.Now
+            //We will found in DB that in the "Employees" Table  this is new Record Added in the columns with values
+            //Id = 1 - Name = "Eslam" - Age = 22 - Address = "Mansoura"
+            //And Inside the "FullTimeEmployees" Table we will found that new Record Added In the columns With values
+            //Id = 1 - Salary = 4000 - StartDate = 2025-03-16 15:33:12.5700416
+
+            //using MyCompanyDbContext dbContext = new MyCompanyDbContext();
+            //FullTimeEmployee fullTimeEmployee = new FullTimeEmployee()
+            //{
+            //    Name = "Eslam",
+            //    Age = 22,
+            //    Address = "Mansoura",
+            //    Salary = 4000,
+            //    StartDate = DateTime.Now
+            //};
+            //PartTimeEmployee partTimeEmployee = new PartTimeEmployee()
+            //{
+            //    Name = "Heba",
+            //    Age = 20,
+            //    Address = "Mansoura",
+            //    HourRate = 50,
+            //    CountOfHours = 10
+            //};
+
+            ///01 - Add FullTime Employee object/Record
+            ///
+            //dbContext.Add<FullTimeEmployee>(fullTimeEmployee);
+            //it's like add in Employees Table object of type FullTimeEmployee ->
+            //dbContext.Add<Employee>(fullTimeEmployee);
+
+            ///02 - Add PartTime Employee object/Record
+            ///
+            //dbContext.Add<PartTimeEmployee>(partTimeEmployee);
+            //it's like add in Employees Table object of type PartTimeEmployee ->
+            //dbContext.Add<Employee>(partTimeEmployee);
+
+            //dbContext.SaveChanges();
+
+            //So Now You Have 3 options ->
+            //Deal with Table Employees Only
+            //Deal with Table FullTimeEmployees Only
+            //Deal with Table PartTimeEmployees Only
+
+            #region Example01 - Retrieve Data Of Employees Table [FullTime & PartTime]
+
+            //var Employees = (from E in dbContext.Employees
+            //                select E).ToList();//Immediate Execution.[Retrieve All Data First]
+
+            //if(Employees is not null)
+            //{
+            //    foreach (var item in Employees)
+            //    {
+            //        Console.WriteLine($"{item.Name}::{item.Age}::{item.Address}");//Eslam::22::Mansoura
+            //                                                                            //Heba::20::Mansoura
+            //    }
+            //}
+
+            #endregion
+
+            #region Example02 - Retrieve Data Of FullTimeEmployee Table .
+
+            //var Employees =from E in dbContext.Employees
+            //                 select E;//Deferred Execution -> This query will not executed until use "Employees" variable
+            //                          // So This is one query will executed to get data of FullTimeEmployee not 2 queries like previous to retreive data of Employees Table then filter.
+
+            //if (Employees is not null)
+            //{
+            //    foreach (var item in Employees.OfType<FullTimeEmployee>())
+            //    {
+            //        Console.WriteLine($"{item.Name}::{item.Age}::{item.Address}::{item.Salary}::{item.StartDate}");
+            //        //Eslam::22::Mansoura::4000.00::3/16/2025 5:15:17 PM                                                              
+            //    }
+            //}
+
+            #endregion
+
+            #region Example03 - Retrieve Data Of FullTimeEmployee Table .
+
+            var Employees = from E in dbContext.Employees
+                            select E;//Deferred Execution -> This query will not executed until use "Employees" variable
+                                     // So This is one query will executed to get data of PartTimeEmployee not 2 queries like previous to retrieve data of Employees Table then filter.
+
+            if (Employees is not null)
+            {
+                foreach (var item in Employees.OfType<PartTimeEmployee>())
+                {
+                    Console.WriteLine($"{item.Name}::{item.Age}::{item.Address}::{item.HourRate}::{item.CountOfHours}");
+                    //Heba::20::Mansoura::50.00::10                                                             
+                }
+            }
+
+            #endregion
+
+            #endregion
+
+            ///Use [TPCT] -> If you need to deal with FullTimeEmployees Table & PartTimeEmployees Table as seperate from each other
+            ///And don't care about repeated columns "Id" - "Age" - "Address" in the 2 tables.
+            ///
+            ///Use [TPH] -> If You Need to deal with Employees in one table Regardless of Types "FullTimEmployee" - "PartTimEmployee"
+            ///And Distinguished between them based on the Discriminator column
+            ///And if you don't care about "Nulls" in the data.
+            ///
+            ///Use [TPT] -> If You need to deal with each type as separate table
+            ///And Common Columns are in the base class.
+        
+            
+        
         }
     }
 }

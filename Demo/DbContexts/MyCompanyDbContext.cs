@@ -16,9 +16,15 @@ namespace Demo.DbContexts
         #endregion
 
         #region [TPH] Strategy - Map the 3 tables as one table for all inheritance hierarchy.
-        public DbSet<Employee> Employees { get; set; }
+        //public DbSet<Employee> Employees { get; set; }
         //public DbSet<FullTimeEmployee> FullTimeEmployees { get; set; }
         //public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; } //Or Define Them As Children For base class "Employee" inside OnModelCreating().
+        #endregion
+
+        #region [TPT] Strategy - Make table for every type in the inheritance hierarchy. 
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<FullTimeEmployee> FullTimeEmployees { get; set; }
+        public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; }
         #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -28,16 +34,28 @@ namespace Demo.DbContexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<FullTimeEmployee>()
-            //            .HasBaseType<Employee>();
+            //Map (TPH - Table Per Hierarchy) Approach. 
+            //
+            ///01 ->
+            ///modelBuilder.Entity<FullTimeEmployee>()
+            ///            .HasBaseType<Employee>();
+            ///
+            ///modelBuilder.Entity<PartTimeEmployee>()
+            ///            .HasBaseType<Employee>();
 
-            //modelBuilder.Entity<PartTimeEmployee>()
-            //            .HasBaseType<Employee>();
+            ///02-> [To Change The Discriminator column name].
+            ///modelBuilder.Entity<Employee>()
+            ///            .HasDiscriminator<string>("EmployeeType")
+            ///            .HasValue<FullTimeEmployee>("FTE")
+            ///            .HasValue<PartTimeEmployee>("PTE");
+            ///            
 
-            modelBuilder.Entity<Employee>()
-                        .HasDiscriminator<string>("EmployeeType")
-                        .HasValue<FullTimeEmployee>("FTE")
-                        .HasValue<PartTimeEmployee>("PTE");
+            //Map (TPT - Table Per Type) Approach
+            //
+            modelBuilder.Entity<FullTimeEmployee>() 
+                        .ToTable("FullTimeEmployees");
+            modelBuilder.Entity<PartTimeEmployee>()
+                        .ToTable("PartTimeEmployees");
         }
 
     }

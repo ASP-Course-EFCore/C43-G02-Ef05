@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Demo.Migrations
 {
     [DbContext(typeof(MyCompanyDbContext))]
-    [Migration("20250314223845_TPHMigration")]
-    partial class TPHMigration
+    [Migration("20250316132512_TPTMigration")]
+    partial class TPTMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,11 +39,6 @@ namespace Demo.Migrations
                     b.Property<int?>("Age")
                         .HasColumnType("int");
 
-                    b.Property<string>("EmployeeType")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -52,9 +47,7 @@ namespace Demo.Migrations
 
                     b.ToTable("Employees");
 
-                    b.HasDiscriminator<string>("EmployeeType").HasValue("Employee");
-
-                    b.UseTphMappingStrategy();
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Demo.Models.FullTimeEmployee", b =>
@@ -67,7 +60,7 @@ namespace Demo.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.HasDiscriminator().HasValue("FTE");
+                    b.ToTable("FullTimeEmployees", (string)null);
                 });
 
             modelBuilder.Entity("Demo.Models.PartTimeEmployee", b =>
@@ -80,7 +73,25 @@ namespace Demo.Migrations
                     b.Property<decimal>("HourRate")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasDiscriminator().HasValue("PTE");
+                    b.ToTable("PartTimeEmployees", (string)null);
+                });
+
+            modelBuilder.Entity("Demo.Models.FullTimeEmployee", b =>
+                {
+                    b.HasOne("Demo.Models.Employee", null)
+                        .WithOne()
+                        .HasForeignKey("Demo.Models.FullTimeEmployee", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Demo.Models.PartTimeEmployee", b =>
+                {
+                    b.HasOne("Demo.Models.Employee", null)
+                        .WithOne()
+                        .HasForeignKey("Demo.Models.PartTimeEmployee", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
