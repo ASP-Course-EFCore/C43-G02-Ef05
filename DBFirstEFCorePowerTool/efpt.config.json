@@ -42,6 +42,14 @@
       {
          "Name": "[dbo].[Region]",
          "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CustOrderHist]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[DeleteProductByID]",
+         "ObjectType": 1
       }
    ],
    "UiHint": null,

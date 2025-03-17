@@ -1,5 +1,7 @@
 ﻿using DBFirstEFCorePowerTool.dbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Text;
 
 namespace DBFirstEFCorePowerTool
 {
@@ -92,7 +94,69 @@ namespace DBFirstEFCorePowerTool
             //Because you write syntax of SqlServer
             //So you can't use this APP/Project with another Database provider
             //So We don't use this way - We query DB objects using the LinQ operators.
+
+            #endregion
+
+            #region Part 09 Stored Procdures
+            //There are 2 ways to execute Stored Procedure In APP ->
+
+            #region 01 Execute it by call it throw the Generated procedure Class.
+
+            //NorthwindDbContext dbContext = new NorthwindDbContext();
+            //NorthwindDbContextProcedures dbContextProcedures = new NorthwindDbContextProcedures(dbContext);
+
+            //var CustOrders01 = dbContextProcedures.CustOrderHistAsync("ALFKI").Result;//Execute the stored procedure "CustOrderHist".
+
+            //foreach (var item in CustOrders01)
+            //{
+            //    Console.WriteLine(item);
+            //    //Chartreuse verte -21
+            //    //Escargots de Bourgogne - 40
+            //    //Flotemysost - 20
+            //    //Grandma's Boysenberry Spread - 16
+            //    //Lakkalikööri - 15
+            //    //Original Frankfurter grüne Soße -2
+            //    //Raclette Courdavault -15
+            //    //Rössle Sauerkraut -17
+            //    //Spegesild - 2
+            //    //TestTest - 6
+            //    //Vegie - spread - 20
+            //}
+
+            #endregion
+
+            #region 02 Execute it by call it throw the Procedure Property [that hold all loaded/generated procedures] in the DbContext Class.
+
+            //NorthwindDbContext dbContext = new NorthwindDbContext();
+            //var CustOrders02 = dbContext.Procedures.CustOrderHistAsync("ALFKI").Result;
+
+            //foreach (var item in CustOrders02)
+            //{
+            //    Console.WriteLine(item);
+            //    //Chartreuse verte :: 21
+            //    //Escargots de Bourgogne:: 40
+            //    //Flotemysost:: 20
+            //    //Grandma's Boysenberry Spread :: 16
+            //    //Lakkalikööri:: 15
+            //    //Original Frankfurter grüne Soße :: 2
+            //    //Raclette Courdavault :: 15
+            //    //Rössle Sauerkraut :: 17
+            //    //Spegesild:: 2
+            //    //TestTest:: 6
+            //    //Vegie - spread:: 20
+
+            //}
+
+            #endregion
+
+            #region Example => Deal with Delete Product By Id Procedure
+            //NorthwindDbContext dbContext = new NorthwindDbContext();
             
+            //var result = dbContext.Procedures.DeleteProductByIDAsync(91).Result;
+            //Console.WriteLine($"{result} Row Affected!");//1 Row Affected!
+
+            #endregion
+
             #endregion
 
         }
