@@ -1,6 +1,7 @@
 ﻿using Demo.DbContexts;
 using Demo.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System.Reflection.Emit;
 
 namespace Demo
@@ -433,6 +434,92 @@ namespace Demo
             #endregion
 
             //So I use Local Keyword to search on the loaded data locally instead of send requests to Database.
+
+            #endregion
+
+            #region Part 10 Views
+            //If you work CodeFirst Approach And need to map Model that represent view =>
+            //View is just select statement, so it not model/entity
+            //so i need to create/map it only
+            //So I need to put creating of this view in migration . why?
+            //because when send this project to any one or upload it on server 
+            //run all migrations which contain migration of creating this view.
+
+            #region Example01 -> Create View "EmployeeDepartment" which represent Employees In Departments and map it to DB ->
+
+            // 1. Make Empty Migration 
+            // 2. Put SQL Query of create this view inside UP() method of migration
+            //       protected override void Up(MigrationBuilder migrationBuilder)
+            //        {
+            //            migrationBuilder.Sql(@"Create view EmployeeDepartment
+            //                                    With encryption,schemaBinding
+            //                                    As
+            //                                     Select E.Code EmployeeCode, E.EmpName EmployeeName, D.DeptId DepartmentId, D.DepartmentName 
+            //                                     From dbo.Employees E join Sales.Departments D
+            //                                     On E.DepartmentId = D.DeptId");
+            //        }
+            // 3. In The Down() Drop this view 
+            //     protected override void Down(MigrationBuilder migrationBuilder)
+            //      {
+            //          migrationBuilder.Sql("Drop View EmployeeDepartmentView");
+            //      }
+            // 4. Run Command Update-Database to map this view to DB.
+
+            //To Deal with this view Inside the Application, You must represent it in model in App ->
+            // 1. Make new model contain properties same as columns of view select statement.
+            // 2. put DataAnnotation [KeyLess] on it.
+            // 3. make "DbSet<ViewName> View" in the DbContext Class
+            // 4. Make Configuration on this model by Fluent APIs inside OnModelCreating() to say that this model will mapped as view => .ToView() 
+            //     modelBuilder.Entity<EmployeeDepartmentView>().ToView("EmployeeDepartmentView");
+
+            #endregion
+
+            #region Example02 -> Create View "FullTimeEmployeeView" which Represent FullTimeEmployees Data ->
+
+            // 1. Make Empty Migration 
+            // 2. Put SQL Query of create this view inside UP() method of migration
+            //       protected override void Up(MigrationBuilder migrationBuilder)
+            //               {
+            //                   migrationBuilder.Sql(@"create view FullTimeEmployeeView
+            //                                               With encryption,schemaBinding
+            //                                               As
+            //                                                Select E.Name,E.Age,E.Address,FT.Salary,FT.StartDate 
+            //                                                From dbo.FullTimeEmployees FT join dbo.Employees E
+            //                                                On FT.Id = E.Id");
+            //               }
+            // 3. In The Down() Drop this view 
+            //     protected override void Down(MigrationBuilder migrationBuilder)
+            //             {
+            //                 migrationBuilder.Sql("Drop View FullTimeEmployeeView");
+            //             }
+            // 4. Run Command Update-Database to map this view to DB.
+
+            //To Deal with this view Inside the Application, You must represent it in model in App ->
+            // 1. Make new model contain properties same as columns of view select statement.
+            // 2. put DataAnnotation [KeyLess] on it.
+            // 3. make "DbSet<ViewName> View" in the DbContext Class
+            // 4. Make Configuration on this model by Fluent APIs inside OnModelCreating() to say that this model will mapped as view => .ToView() 
+            //      modelBuilder.Entity<FullTimeEmployeeView>().ToView("FullTimeEmployeeView");
+
+            #endregion
+
+            #region Deal With View In APP
+
+            //MyCompanyDbContext dbContext = new MyCompanyDbContext();
+
+            //var result = dbContext.FullTimeEmployeeView.Select(FT => new
+            //{
+            //    FT.Name,
+            //    FT.Age,
+            //    FT.StartDate
+            //});
+
+            //foreach (var item in result)
+            //{
+            //    Console.WriteLine(item);//{ Name = Eslam, Age = 22, StartDate = 3/16/2025 5:15:17 PM }
+            //}
+
+            #endregion
 
             #endregion
 

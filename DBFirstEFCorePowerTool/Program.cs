@@ -151,11 +151,34 @@ namespace DBFirstEFCorePowerTool
 
             #region Example => Deal with Delete Product By Id Procedure
             //NorthwindDbContext dbContext = new NorthwindDbContext();
-            
+
             //var result = dbContext.Procedures.DeleteProductByIDAsync(91).Result;
             //Console.WriteLine($"{result} Row Affected!");//1 Row Affected!
 
             #endregion
+
+            #endregion
+
+            #region Part 10 Views
+
+            //If you work Database First Approach =>
+            //Make Reverse Engineering for this view
+            //EF Core will make Model for this view contain columns that this view see and this model "KeyLess" not has PK
+            //And configure this model In DbContext as DbSet<ViewName> "DbSet<ProductsByCategory> ProductsByCategories"and Configure it in OnModelCreating() To Map it as view -> .ToView()
+
+            NorthwindDbContext dbContext = new NorthwindDbContext();
+            var result = dbContext.ProductsByCategories.Select(p => new
+            {
+                p.ProductName,
+                p.UnitsInStock,
+                p.Discontinued
+            });
+            //Generated Query -> SELECT [p].[ProductName], [p].[UnitsInStock], [p].[Discontinued]
+            //                   FROM[Products by Category] AS[p]
+            foreach (var item in result)
+            {
+                Console.WriteLine(item); 
+            }
 
             #endregion
 

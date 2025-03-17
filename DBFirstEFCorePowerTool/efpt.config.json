@@ -44,6 +44,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[Products by Category]",
+         "ObjectType": 3
+      },
+      {
          "Name": "[dbo].[CustOrderHist]",
          "ObjectType": 1
       },

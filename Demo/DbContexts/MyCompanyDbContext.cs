@@ -27,6 +27,8 @@ namespace Demo.DbContexts
         public DbSet<PartTimeEmployee> PartTimeEmployees { get; set; }
         #endregion
 
+        public DbSet<FullTimeEmployeeView> FullTimeEmployeeView { get; set; }
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Server = . ; Database = MyCompany ; Trusted_Connection = true ; TrustServerCertificate = true");
@@ -56,6 +58,11 @@ namespace Demo.DbContexts
                         .ToTable("FullTimeEmployees");
             modelBuilder.Entity<PartTimeEmployee>()
                         .ToTable("PartTimeEmployees");
+
+
+            //Represent The View "FullTimeEmployeeView" in The APP.
+            modelBuilder.Entity<FullTimeEmployeeView>().ToView("FullTimeEmployeeView");
+
         }
 
     }

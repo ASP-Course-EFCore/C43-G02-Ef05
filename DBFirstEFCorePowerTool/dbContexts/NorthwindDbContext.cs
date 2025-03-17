@@ -27,6 +27,8 @@ public partial class NorthwindDbContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductsByCategory> ProductsByCategories { get; set; }
+
     public virtual DbSet<Region> Regions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -41,6 +43,7 @@ public partial class NorthwindDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.EmployeeConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.ProductsByCategoryConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.RegionConfiguration());
         OnModelCreatingPartial(modelBuilder);
     }
